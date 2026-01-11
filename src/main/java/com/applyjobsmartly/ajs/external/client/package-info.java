@@ -1,0 +1,1 @@
+package com.applyjobsmartly.ajs.external.client;
