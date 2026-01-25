@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.applyjobsmartly.ajs.dto.response.GreenhouseResponse;
+import com.applyjobsmartly.ajs.dto.response.LeverJobDto;
 import com.applyjobsmartly.ajs.entity.Job;
 import com.applyjobsmartly.ajs.external.service.ExternalJobFetcher;
 
@@ -14,47 +14,46 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class GreenhouseJobFetcher implements ExternalJobFetcher {
+public class LeverJobFetcherImpl implements ExternalJobFetcher {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Override
     public List<Job> fetchJobs(String careerPageUrl) {
 
-        log.info("begin GreenhouseJobFetcherImpl --> fetchJobs");
+        log.info("begin LeverJobFetcherImpl --> fetchJobs");
 
         List<Job> jobs = new ArrayList<>();
 
         try {
             // careerPageUrl example:
-            // https://boards.greenhouse.io/airbnb
+            // https://jobs.lever.co/spotify
             String companySlug =
                     careerPageUrl.substring(careerPageUrl.lastIndexOf("/") + 1);
 
             String apiUrl =
-                    "https://boards-api.greenhouse.io/v1/boards/"
-                            + companySlug + "/jobs";
+                    "https://api.lever.co/v0/postings/" + companySlug;
 
-            GreenhouseResponse response =
-                    restTemplate.getForObject(apiUrl, GreenhouseResponse.class);
+            LeverJobDto[] response =
+                    restTemplate.getForObject(apiUrl, LeverJobDto[].class);
 
-            if (response != null && response.getJobs() != null) {
-                response.getJobs().forEach(j -> {
+            if (response != null) {
+                for (LeverJobDto j : response) {
                     Job job = Job.builder()
-                            .title(j.getTitle())
-                            .location(j.getLocation().getName())
-                            .applyUrl(j.getAbsoluteUrl())
+                            .title(j.getText())
+                            .location(j.getCategories().getLocation())
+                            .applyUrl(j.getHostedUrl())
 //                            .external(true)
                             .build();
                     jobs.add(job);
-                });
+                }
             }
 
         } catch (Exception e) {
-            log.error("Error fetching Greenhouse jobs", e);
+            log.error("Error fetching Lever jobs", e);
         }
 
-        log.info("end GreenhouseJobFetcherImpl --> fetchJobs");
+        log.info("end LeverJobFetcherImpl --> fetchJobs");
         return jobs;
     }
 }

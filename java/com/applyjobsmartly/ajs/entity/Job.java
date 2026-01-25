@@ -1,37 +1,21 @@
 package com.applyjobsmartly.ajs.entity;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 
 @Entity
 //@Table(name = "jobs")
 @Table(
-	    name = "job",
+	    name = "jobs",
 	    uniqueConstraints = {
-	        @UniqueConstraint(
-	            name = "uk_job_company_apply",
-	            columnNames = {"company_id", "apply_url"}
-	        )
+	        @UniqueConstraint(columnNames = {"external_job_id", "external_source"})
 	    }
 	)
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@SuperBuilder
 public class Job extends BaseEntity {
 
     @Column(name = "title")
@@ -57,13 +41,4 @@ public class Job extends BaseEntity {
 
     @Column(name = "verified")
     private boolean verified;
-    
-
-    @Column(name = "last_fetched_at")
-    private LocalDateTime lastFetchedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id", nullable = false)
-    private Company company;
-
 }
